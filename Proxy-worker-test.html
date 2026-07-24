@@ -1,7 +1,16 @@
-<script>
-fetch("https://cold-grass-67af.esha2025x1.workers.dev", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ line: "TEST-EVENT" })
-});
-</script>
+<!DOCTYPE html>
+<html>
+  <body>
+    <script>
+      fetch("https://cold-grass-67af.esha2025x1.workers.dev", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ line: "TEST-EVENT" })
+      })
+      .then(r => console.log("Worker response:", r.status))
+      .catch(e => console.error("Error:", e));
+    </script>
+
+    <p>Test wird ausgeführt…</p>
+  </body>
+</html>
