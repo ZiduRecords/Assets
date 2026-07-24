@@ -1,16 +1,31 @@
 export default {
   async fetch(request) {
+    // CORS Preflight
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        }
+      });
+    }
+
+    // Nur POST zulassen
     if (request.method !== "POST") {
       return new Response("Method not allowed", { status: 405 });
     }
 
     const { line } = await request.json();
 
+    const githubToken = GITHUB_TOKEN;
+
     await fetch("https://api.github.com/repos/ZiduRecords/Logs/dispatches", {
       method: "POST",
       headers: {
         "Accept": "application/vnd.github.everest-preview+json",
-        "Authorization": `Bearer ${LOG_TOKEN}`
+        "Authorization": `Bearer ${githubToken}`
       },
       body: JSON.stringify({
         event_type: "log-event",
@@ -18,6 +33,11 @@ export default {
       })
     });
 
-    return new Response("OK", { status: 200 });
+    return new Response("OK", {
+      status: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
   }
 };
