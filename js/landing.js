@@ -11,7 +11,12 @@ function sendLogEvent(eventObj) {
     eventObj.destination
   ].join(";");
 
-  console.log("LogEvent:", line);
+  fetch("https://zidurecords.github.io/Assets/log-proxy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ line })
+  });
+
 }
 
 /* Init */
