@@ -11,7 +11,7 @@ function sendLogEvent(eventObj) {
     eventObj.destination
   ].join(";");
 
-  fetch("https://zidurecords.github.io/Assets/log-proxy", {
+  fetch("https://log-proxy.esha2025x1.workers.dev", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ line })
