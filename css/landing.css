@@ -1,0 +1,126 @@
+:root {
+  --accent-gold: #d4a75c;
+  --accent-amber: #e6b980;
+  --text-light: #f5f5f5;
+  --spotify-green: #1DB954;
+  --apple-red: #ff3b30;
+  --tiktok-black: #000;
+  --instagram-purple: #5a2a82;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #222;
+  color: var(--text-light);
+  text-align: center;
+  padding: 10px;
+  animation: bgPulse 14s ease-in-out infinite;
+}
+
+@keyframes bgPulse {
+  0%   { filter: brightness(1); }
+  50%  { filter: brightness(1.12); }
+  100% { filter: brightness(1); }
+}
+
+h1 {
+  margin-bottom: 14px;
+  font-size: 26px;
+  text-shadow: 0 0 8px rgba(0,0,0,0.6);
+}
+
+.glow {
+  animation: glowPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%   { text-shadow: 0 0 4px rgba(255,255,255,0.2); }
+  50%  { text-shadow: 0 0 14px rgba(255,255,255,0.45); }
+  100% { text-shadow: 0 0 4px rgba(255,255,255,0.2); }
+}
+
+img.cover {
+  border-radius: 10px;
+  box-shadow: 0 0 14px rgba(0,0,0,0.6);
+  margin-bottom: 18px;
+  transition: transform 0.3s ease;
+}
+
+img.cover:hover {
+  transform: scale(1.03);
+}
+
+.platform-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 10px auto;
+  max-width: 260px;
+}
+
+#platforms {
+  margin-bottom: 40px;
+}
+
+.platform-logo {
+  width: 26px;
+}
+
+a.button {
+  display: inline-block;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  width: 180px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+a.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.35;
+  filter: grayscale(40%);
+}
+
+a.button.spotify   { background: var(--spotify-green);   color: #fff; }
+a.button.apple     { background: var(--apple-red);       color: #fff; }
+a.button.presave   { background: var(--accent-gold);     color: #000; }
+a.button.instagram { background: var(--instagram-purple);color: #fff; }
+a.button.tiktok    { background: var(--tiktok-black);    color: #fff; }
+
+#consent-dialog {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 99999;
+}
+
+.consent-box {
+  background: rgba(17,17,17,0.92);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  padding: 20px;
+  width: 280px;
+  margin: 340px auto 0 auto;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 0 14px rgba(0,0,0,0.5);
+}
+
+.consent-box button {
+  padding: 8px 14px;
+  margin: 6px;
+  background: var(--accent-gold);
+  border: none;
+  color: #000;
+  border-radius: 6px;
+  cursor: pointer;
+}
