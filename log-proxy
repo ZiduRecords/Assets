@@ -1,0 +1,23 @@
+export default {
+  async fetch(request) {
+    if (request.method !== "POST") {
+      return new Response("Method not allowed", { status: 405 });
+    }
+
+    const { line } = await request.json();
+
+    await fetch("https://api.github.com/repos/ZiduRecords/Logs/dispatches", {
+      method: "POST",
+      headers: {
+        "Accept": "application/vnd.github.everest-preview+json",
+        "Authorization": `Bearer ${LOG_TOKEN}`
+      },
+      body: JSON.stringify({
+        event_type: "log-event",
+        client_payload: { line }
+      })
+    });
+
+    return new Response("OK", { status: 200 });
+  }
+};
