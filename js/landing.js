@@ -43,7 +43,8 @@ platforms.forEach(p => {
 
   const btn = document.createElement("a");
   btn.href = p.link;
-  btn.className = `button ${p.text.toLowerCase().replace(" ", "")} disabled`;
+  const cls = (p.text === "Apple Music") ? "apple" : p.text.toLowerCase().replace(" ", "");
+  btn.className = `button ${cls} disabled`;
   btn.innerText = p.text;
 
   btn.onclick = function(event) {
