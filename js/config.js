@@ -1,6 +1,6 @@
 /* Zentrale Pixel-Konfiguration */
 
-const META_PIXEL_ID = "DEINE_META_PIXEL_ID";
+const META_PIXEL_ID = "1288632976680117";
 const TIKTOK_PIXEL_ID = "DEINE_TIKTOK_PIXEL_ID";
 
 /* Pixel aktivieren/deaktivieren */
