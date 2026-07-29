@@ -60,33 +60,42 @@ btn.onclick = function(event) {
   const medium = urlParams.get('utm_medium') || "";
   const campaign = urlParams.get('utm_campaign') || "";
 
-  // META EVENTS
-  fbq('track', 'OutboundClick');
-  fbq('track', p.text.replace(" ", "") + 'Click'); // z.B. SpotifyClick
+  // Name des Events automatisch erzeugen
+  const eventName = p.text.replace(/\s+/g, '') + 'Click';  
+  // Spotify → SpotifyClick
+  // Apple Music → AppleMusicClick
+  // Instagram → InstagramClick
+  // TikTok → TikTokClick
+  // Presave → PresaveClick
 
-  // TIKTOK EVENTS (optional)
+  /* META EVENTS */
+  fbq('track', 'OutboundClick');
+  fbq('track', eventName);
+
+  /* TIKTOK EVENTS */
   ttq.track('ClickButton', {
     button_name: p.text,
     destination: p.link
   });
 
-  // Logging to Worker
+  /* Logging to Worker */
   sendLogEvent({
     timestamp: new Date().toISOString(),
     song: SONG_TITLE,
     platform: p.text,
-    event: p.text.replace(" ", "") + "Click",
+    event: eventName,
     source,
     medium,
     campaign,
     destination: p.link
   });
 
-  // Delay so Pixel can send events
+  /* Delay so Pixel can send events */
   setTimeout(() => {
     window.location.href = p.link;
   }, 180);
 };
+
 
 
   row.appendChild(logo);
