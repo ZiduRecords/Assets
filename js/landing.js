@@ -52,29 +52,42 @@ platforms.forEach(p => {
   btn.className = `button ${cls} disabled`;
   btn.innerText = p.text;
 
-  btn.onclick = function(event) {
-    event.preventDefault();
+btn.onclick = function(event) {
+  event.preventDefault();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const source = urlParams.get('utm_source') || "organic";
-    const medium = urlParams.get('utm_medium') || "";
-    const campaign = urlParams.get('utm_campaign') || "";
+  const urlParams = new URLSearchParams(window.location.search);
+  const source = urlParams.get('utm_source') || "organic";
+  const medium = urlParams.get('utm_medium') || "";
+  const campaign = urlParams.get('utm_campaign') || "";
 
-    sendLogEvent({
-      timestamp: new Date().toISOString(),
-      song: SONG_TITLE,
-      platform: p.text,
-      event: p.text.replace(" ", "") + "Click",
-      source,
-      medium,
-      campaign,
-      destination: p.link
-    });
+  // META EVENTS
+  fbq('track', 'OutboundClick');
+  fbq('track', p.text.replace(" ", "") + 'Click'); // z.B. SpotifyClick
 
-    setTimeout(() => {
-      window.location.href = p.link;
-    }, 180);
-  };
+  // TIKTOK EVENTS (optional)
+  ttq.track('ClickButton', {
+    button_name: p.text,
+    destination: p.link
+  });
+
+  // Logging to Worker
+  sendLogEvent({
+    timestamp: new Date().toISOString(),
+    song: SONG_TITLE,
+    platform: p.text,
+    event: p.text.replace(" ", "") + "Click",
+    source,
+    medium,
+    campaign,
+    destination: p.link
+  });
+
+  // Delay so Pixel can send events
+  setTimeout(() => {
+    window.location.href = p.link;
+  }, 180);
+};
+
 
   row.appendChild(logo);
   row.appendChild(btn);
