@@ -39,17 +39,34 @@ const platforms = [
 ];
 
 platforms.forEach(p => {
+
+  // Sichtbarkeit prüfen
+  if (
+      (p.text === "Presave"    && !SHOW_PRESAVE)   ||
+      (p.text === "Spotify"    && !SHOW_SPOTIFY)   ||
+      (p.text === "Apple Music"&& !SHOW_APPLE)     ||
+      (p.text === "Instagram"  && !SHOW_INSTAGRAM) ||
+      (p.text === "TikTok"     && !SHOW_TIKTOK)
+  ) {
+      return; // Button nicht anzeigen
+  }
+  
   const row = document.createElement("div");
   row.className = "platform-row";
 
   const logo = document.createElement("img");
   logo.src = p.logo;
   logo.className = "platform-logo";
+  logo.style.width = LOGO_SIZE + "px";
+  logo.style.height = LOGO_SIZE + "px";
+
 
   const btn = document.createElement("a");
   btn.href = p.link;
   const cls = (p.text === "Apple Music") ? "apple" : p.text.toLowerCase().replace(" ", "");
   btn.className = `button ${cls} disabled`;
+  btn.className = `button ${cls} disabled`;
+  btn.style.fontSize = BUTTON_SIZE + "px";
   btn.innerText = p.text;
 
 btn.onclick = function(event) {
