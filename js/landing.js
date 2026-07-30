@@ -1,4 +1,4 @@
-/* Logging-Hook (Proxy später nötig) */
+/* Logging-Hook */
 function sendLogEvent(eventObj) {
   const line = [
     eventObj.timestamp,
@@ -29,19 +29,20 @@ extractColors(COVER_IMG);
 
 const container = document.getElementById("platforms");
 
+/* Plattformen */
 const platforms = [
+  { logo: "https://zidurecords.github.io/Assets/img/PRESAVELOGO.png",   text: "Presave",     link: PRESAVE_LINK,    show: SHOW_PRESAVE },
   { logo: "https://zidurecords.github.io/Assets/img/SPOTIFYLOGO.png",   text: "Spotify",     link: SPOTIFY_LINK,    show: SHOW_SPOTIFY },
   { logo: "https://zidurecords.github.io/Assets/img/APPLELOGO.png",     text: "Apple Music", link: APPLE_LINK,      show: SHOW_APPLE },
   { logo: "https://zidurecords.github.io/Assets/img/INSTAGRAMLOGO.png", text: "Instagram",   link: INSTAGRAM_LINK,  show: SHOW_INSTAGRAM },
-  { logo: "https://zidurecords.github.io/Assets/img/TIKTOKLOGO.png",    text: "TikTok",      link: TIKTOK_LINK,     show: SHOW_TIKTOK },
-  { logo: "https://zidurecords.github.io/Assets/img/PRESAVELOGO.png",   text: "Presave",     link: PRESAVE_LINK,    show: SHOW_PRESAVE }
+  { logo: "https://zidurecords.github.io/Assets/img/TIKTOKLOGO.png",    text: "TikTok",      link: TIKTOK_LINK,     show: SHOW_TIKTOK }
 ];
 
+/* Rendern */
 platforms.forEach(p => {
 
-  // Sichtbarkeit prüfen
   if (!p.show) return;
-  
+
   const row = document.createElement("div");
   row.className = "platform-row";
 
@@ -51,60 +52,46 @@ platforms.forEach(p => {
   logo.style.width = LOGO_SIZE + "px";
   logo.style.height = LOGO_SIZE + "px";
 
-
   const btn = document.createElement("a");
   btn.href = p.link;
   const cls = (p.text === "Apple Music") ? "apple" : p.text.toLowerCase().replace(" ", "");
   btn.className = `button ${cls} disabled`;
-  btn.className = `button ${cls} disabled`;
   btn.style.fontSize = BUTTON_SIZE + "px";
   btn.innerText = p.text;
 
-btn.onclick = function(event) {
-  event.preventDefault();
+  btn.onclick = function(event) {
+    event.preventDefault();
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const source = urlParams.get('utm_source') || "organic";
-  const medium = urlParams.get('utm_medium') || "";
-  const campaign = urlParams.get('utm_campaign') || "";
+    const urlParams = new URLSearchParams(window.location.search);
+    const source = urlParams.get('utm_source') || "organic";
+    const medium = urlParams.get('utm_medium') || "";
+    const campaign = urlParams.get('utm_campaign') || "";
 
-  // Name des Events automatisch erzeugen
-  const eventName = p.text.replace(/\s+/g, '') + 'Click';  
-  // Spotify → SpotifyClick
-  // Apple Music → AppleMusicClick
-  // Instagram → InstagramClick
-  // TikTok → TikTokClick
-  // Presave → PresaveClick
+    const eventName = p.text.replace(/\s+/g, '') + 'Click';
 
-  /* META EVENTS */
-  fbq('track', 'OutboundClick');
-  fbq('track', eventName);
+    fbq('track', 'OutboundClick');
+    fbq('track', eventName);
 
-  /* TIKTOK EVENTS */
-  ttq.track('ClickButton', {
-    button_name: p.text,
-    destination: p.link
-  });
+    ttq.track('ClickButton', {
+      button_name: p.text,
+      destination: p.link
+    });
 
-  /* Logging to Worker */
-  sendLogEvent({
-    timestamp: new Date().toISOString(),
-    song: SONG_TITLE,
-    platform: p.text,
-    event: eventName,
-    source,
-    medium,
-    campaign,
-    destination: p.link
-  });
+    sendLogEvent({
+      timestamp: new Date().toISOString(),
+      song: SONG_TITLE,
+      platform: p.text,
+      event: eventName,
+      source,
+      medium,
+      campaign,
+      destination: p.link
+    });
 
-  /* Delay so Pixel can send events */
-  setTimeout(() => {
-    window.location.href = p.link;
-  }, 180);
-};
-
-
+    setTimeout(() => {
+      window.location.href = p.link;
+    }, 180);
+  };
 
   row.appendChild(logo);
   row.appendChild(btn);
