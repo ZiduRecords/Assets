@@ -5,3 +5,8 @@ const TIKTOK_PIXEL_ID = "DEINE_TIKTOK_PIXEL_ID";
 
 /* Pixel aktivieren/deaktivieren */
 const PIXEL_MODE = true;
+
+/* Größen */
+const COVER_SIZE  = 260;
+const LOGO_SIZE   = 26;
+const BUTTON_SIZE = 12;
