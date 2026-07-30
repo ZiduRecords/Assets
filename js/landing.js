@@ -24,7 +24,7 @@ document.getElementById("song-title").innerText = SONG_TITLE;
 
 const coverImg = document.getElementById("cover-img");
 coverImg.src = COVER_IMG;
-coverImg.style.width = "260px";
+coverImg.style.width = COVER_SIZE + "px";
 
 extractColors(COVER_IMG);
 
