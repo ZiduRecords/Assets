@@ -16,7 +16,6 @@ function sendLogEvent(eventObj) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ line })
   });
-
 }
 
 /* Init */
@@ -34,10 +33,9 @@ const platforms = [
   { logo: "https://zidurecords.github.io/Assets/img/SPOTIFYLOGO.png",   text: "Spotify",     link: SPOTIFY_LINK,    show: SHOW_SPOTIFY },
   { logo: "https://zidurecords.github.io/Assets/img/APPLELOGO.png",     text: "Apple Music", link: APPLE_LINK,      show: SHOW_APPLE },
   { logo: "https://zidurecords.github.io/Assets/img/INSTAGRAMLOGO.png", text: "Instagram",   link: INSTAGRAM_LINK,  show: SHOW_INSTAGRAM },
-  { logo: "https://zidurecords.github.io/Assets/img/TIKTOKLOGO.png",    text: "TikTok",      link: TIKTOK_LINK,     show: SHOW_TIKTOK }
-  { logo: "https://zidurecords.github.io/Assets/img/PRESAVELOGO.png",   text: "Presave",     link: PRESAVE_LINK,    show: SHOW_PRESAVE },
+  { logo: "https://zidurecords.github.io/Assets/img/TIKTOKLOGO.png",    text: "TikTok",      link: TIKTOK_LINK,     show: SHOW_TIKTOK },
+  { logo: "https://zidurecords.github.io/Assets/img/PRESAVELOGO.png",   text: "Presave",     link: PRESAVE_LINK,    show: SHOW_PRESAVE }
 ];
-
 
 platforms.forEach(p => {
 
