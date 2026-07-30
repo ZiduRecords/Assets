@@ -41,15 +41,7 @@ const platforms = [
 platforms.forEach(p => {
 
   // Sichtbarkeit prüfen
-  if (
-      (p.text === "Presave"    && !SHOW_PRESAVE)   ||
-      (p.text === "Spotify"    && !SHOW_SPOTIFY)   ||
-      (p.text === "Apple Music"&& !SHOW_APPLE)     ||
-      (p.text === "Instagram"  && !SHOW_INSTAGRAM) ||
-      (p.text === "TikTok"     && !SHOW_TIKTOK)
-  ) {
-      return; // Button nicht anzeigen
-  }
+  if (!p.show) return;
   
   const row = document.createElement("div");
   row.className = "platform-row";
