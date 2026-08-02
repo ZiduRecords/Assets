@@ -1,5 +1,14 @@
-/* Logging-Hook */
+/* Helper: Cookies auslesen (für _fbp und _fbc von Meta CAPI) */
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
+/* Logging-Hook an neuen Worker */
 function sendLogEvent(eventObj) {
+  // 1. Exakt deine ursprüngliche CSV-Zeile für dein GitHub-Log erstellen
   const line = [
     eventObj.timestamp,
     eventObj.song,
@@ -11,11 +20,28 @@ function sendLogEvent(eventObj) {
     eventObj.destination
   ].join(";");
 
-  fetch("https://log-proxy.esha2025x1.workers.dev", {
+  // 2. An deine neue Custom Domain auf Cloudflare senden
+  fetch("https://worker.uyimbaya.com", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ line })
-  });
+    body: JSON.stringify({
+      line: line, // Für GitHub Logging
+      event_id: eventObj.event_id, // Für Meta CAPI Deduplizierung
+      pixel_id: (typeof META_PIXEL_ID !== 'undefined') ? META_PIXEL_ID : null,
+      pixel_mode: (typeof PIXEL_MODE !== 'undefined') ? PIXEL_MODE : true,
+      timestamp: eventObj.timestamp,
+      song: eventObj.song,
+      platform: eventObj.platform,
+      event: eventObj.event,
+      source: eventObj.source,
+      medium: eventObj.medium,
+      campaign: eventObj.campaign,
+      destination: eventObj.destination,
+      url: window.location.href,
+      fbp: getCookie('_fbp'),
+      fbc: getCookie('_fbc')
+    })
+  }).catch(err => console.error("CAPI Log Error:", err));
 }
 
 /* Init */
@@ -69,15 +95,26 @@ platforms.forEach(p => {
 
     const eventName = p.text.replace(/\s+/g, '') + 'Click';
 
-    fbq('track', 'OutboundClick');
-    fbq('track', eventName);
+    // Eindeutige ID für die Deduplizierung zwischen Browser-Pixel und CAPI
+    const eventId = "evt_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
 
-    ttq.track('ClickButton', {
-      button_name: p.text,
-      destination: p.link
-    });
+    // 1. Meta Browser-Pixel mit eventID abfeuern
+    if (typeof PIXEL_MODE !== 'undefined' && PIXEL_MODE && typeof fbq === 'function') {
+      fbq('track', 'OutboundClick', {}, { eventID: eventId });
+      fbq('track', eventName, {}, { eventID: eventId });
+    }
 
+    // 2. TikTok Pixel abfeuern
+    if (typeof PIXEL_MODE !== 'undefined' && PIXEL_MODE && typeof ttq === 'object') {
+      ttq.track('ClickButton', {
+        button_name: p.text,
+        destination: p.link
+      });
+    }
+
+    // 3. CAPI Event an Cloudflare Worker & GitHub Logs senden
     sendLogEvent({
+      event_id: eventId,
       timestamp: new Date().toISOString(),
       song: SONG_TITLE,
       platform: p.text,
@@ -88,6 +125,7 @@ platforms.forEach(p => {
       destination: p.link
     });
 
+    // Weiterleitung zur Zielplattform nach kurzer Verzögerung
     setTimeout(() => {
       window.location.href = p.link;
     }, 180);
