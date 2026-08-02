@@ -20,7 +20,7 @@ function sendLogEvent(eventObj) {
       line: line, // Für GitHub Logging
       event_id: eventObj.event_id, // Für Meta CAPI Deduplizierung
       pixel_id: (typeof META_PIXEL_ID !== 'undefined') ? META_PIXEL_ID : ((typeof PIXEL_ID !== 'undefined') ? PIXEL_ID : null),
-      pixel_mode: (typeof PIXEL_MODE !== 'undefined') ? PIXEL_MODE : true,
+      pixel_mode: (typeof PIXEL_MODE !== 'undefined' && PIXEL_MODE) ? window.hasConsent : false,
       timestamp: eventObj.timestamp,
       song: eventObj.song,
       platform: eventObj.platform,
@@ -90,14 +90,14 @@ platforms.forEach(p => {
     // Eindeutige ID für die Deduplizierung zwischen Browser-Pixel und CAPI
     const eventId = "evt_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
 
-    // 1. Meta Browser-Pixel mit eventID abfeuern
-    if (typeof PIXEL_MODE !== 'undefined' && PIXEL_MODE && typeof fbq === 'function') {
+    // 1. Meta Browser-Pixel nur abfeuern, wenn Consent vorliegt
+    if (window.hasConsent && typeof fbq === 'function') {
       fbq('track', 'OutboundClick', {}, { eventID: eventId });
       fbq('track', eventName, {}, { eventID: eventId });
     }
-
-    // 2. TikTok Pixel abfeuern
-    if (typeof PIXEL_MODE !== 'undefined' && PIXEL_MODE && typeof ttq === 'object') {
+    
+    // 2. TikTok Pixel nur abfeuern, wenn Consent vorliegt
+    if (window.hasConsent && typeof ttq === 'object') {
       ttq.track('ClickButton', {
         button_name: p.text,
         destination: p.link
