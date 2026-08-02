@@ -1,12 +1,4 @@
-/* Helper: Cookies auslesen (für _fbp und _fbc von Meta CAPI) */
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null;
-}
-
-/* Logging-Hook an neuen Worker */
+/* Logging-Hook an deinen neuen Worker (CAPI + GitHub Logs) */
 function sendLogEvent(eventObj) {
   // 1. Exakt deine ursprüngliche CSV-Zeile für dein GitHub-Log erstellen
   const line = [
@@ -38,10 +30,10 @@ function sendLogEvent(eventObj) {
       campaign: eventObj.campaign,
       destination: eventObj.destination,
       url: window.location.href,
-      fbp: getCookie('_fbp'),
-      fbc: getCookie('_fbc')
+      fbp: (typeof getCookie === 'function') ? getCookie('_fbp') : null,
+      fbc: (typeof getCookie === 'function') ? getCookie('_fbc') : null
     })
-  }).catch(err => console.error("CAPI Log Error:", err));
+  }).catch(err => console.error("Worker Log Error:", err));
 }
 
 /* Init */
@@ -112,7 +104,7 @@ platforms.forEach(p => {
       });
     }
 
-    // 3. CAPI Event an Cloudflare Worker & GitHub Logs senden
+    // 3. Event an Worker senden (CAPI + GitHub Logs)
     sendLogEvent({
       event_id: eventId,
       timestamp: new Date().toISOString(),
@@ -125,7 +117,7 @@ platforms.forEach(p => {
       destination: p.link
     });
 
-    // Weiterleitung zur Zielplattform nach kurzer Verzögerung
+    // Weiterleitung mit gewohnter Verzögerung
     setTimeout(() => {
       window.location.href = p.link;
     }, 180);
