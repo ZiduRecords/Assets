@@ -1,4 +1,8 @@
-/* META PIXEL */
+/* ==========================================
+   1. PIXEL INITIALISIERUNG
+   ========================================== */
+
+/* META PIXEL LOAD */
 function loadMetaPixel(id) {
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -13,7 +17,7 @@ function loadMetaPixel(id) {
   fbq('track', 'PageView');
 }
 
-/* TIKTOK PIXEL */
+/* TIKTOK PIXEL LOAD */
 function loadTikTokPixel(id) {
   !function (w, d, t) {
     w.TiktokAnalyticsObject = t;
@@ -43,4 +47,16 @@ function loadTikTokPixel(id) {
 
   ttq.load(id);
   ttq.page();
+}
+
+/* ==========================================
+   2. HELPER FÜR CONVERSIONS API (CAPI)
+   ========================================== */
+
+/* Liest Cookies für Meta Matching aus (_fbp und _fbc) */
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
 }
