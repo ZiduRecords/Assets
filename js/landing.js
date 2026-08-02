@@ -19,7 +19,7 @@ function sendLogEvent(eventObj) {
     body: JSON.stringify({
       line: line, // Für GitHub Logging
       event_id: eventObj.event_id, // Für Meta CAPI Deduplizierung
-      pixel_id: (typeof META_PIXEL_ID !== 'undefined') ? META_PIXEL_ID : null,
+      pixel_id: (typeof META_PIXEL_ID !== 'undefined') ? META_PIXEL_ID : ((typeof PIXEL_ID !== 'undefined') ? PIXEL_ID : null),
       pixel_mode: (typeof PIXEL_MODE !== 'undefined') ? PIXEL_MODE : true,
       timestamp: eventObj.timestamp,
       song: eventObj.song,
