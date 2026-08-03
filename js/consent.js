@@ -92,3 +92,10 @@ async function checkEU() {
     document.getElementById('consent-dialog').style.display = 'block';
   }
 }
+
+// Automatisch beim Laden der Seite ausführen
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", checkEU);
+} else {
+  checkEU();
+}
