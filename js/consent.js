@@ -70,7 +70,7 @@ function declineConsent() {
   enableButtons();
 }
 
-/* Neue globale Variablen für das Logging */
+/* Globale Variablen für das Logging initialisieren */
 window.userCountry = "UNKNOWN";
 window.isEU = false;
 
@@ -84,12 +84,16 @@ async function checkEU() {
   }
 
   try {
-    const response = await fetch("https://ipapi.co/json/");
+    // Wechsel auf ipwho.is (funktioniert ohne CORS- und Rate-Limit-Probleme auf GitHub Pages)
+    const response = await fetch("https://ipwho.is/");
     const data = await response.json();
 
-    // Land & EU-Status global speichern
-    window.userCountry = data.country_code || data.country || "UNKNOWN";
-    window.isEU = data.in_eu || false; // ipapi liefert direkt ein boolean "in_eu"
+    if (data && data.success) {
+      window.userCountry = data.country_code || "UNKNOWN";
+      window.isEU = data.is_eu || false;
+    } else {
+      window.isEU = true;
+    }
 
     const euCountries = [
       "AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR",
@@ -97,7 +101,6 @@ async function checkEU() {
       "SI","ES","SE"
     ];
 
-    // Zusätzlicher Sicherheits-Check für EU
     if (window.isEU || euCountries.includes(window.userCountry)) {
       window.isEU = true;
       injectConsentDialog();
@@ -108,7 +111,8 @@ async function checkEU() {
       acceptConsent();
     }
   } catch (e) {
-    // Fallback bei Fehler/AdBlocker: Banner zur Sicherheit anzeigen
+    // Fallback bei AdBlocker / Netzwerkfehler: Banner zur Sicherheit anzeigen
+    window.isEU = true;
     injectConsentDialog();
     const dialog = document.getElementById('consent-dialog');
     if (dialog) dialog.style.display = 'block';
