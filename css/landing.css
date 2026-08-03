@@ -124,3 +124,15 @@ a.button.tiktok    { background: var(--tiktok-black);    color: #fff; }
   border-radius: 6px;
   cursor: pointer;
 }
+
+.album-desc {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: -5px;
+  margin-bottom: 20px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.4;
+  text-align: center;
+}
