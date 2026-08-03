@@ -70,6 +70,10 @@ function declineConsent() {
   enableButtons();
 }
 
+/* Neue globale Variablen für das Logging */
+window.userCountry = "UNKNOWN";
+window.isEU = false;
+
 /* 3. EU-Geolokalisierungs-Check */
 async function checkEU() {
   // Wenn Pixel-Mode generell aus ist: Direkt freischalten
@@ -83,14 +87,19 @@ async function checkEU() {
     const response = await fetch("https://ipapi.co/json/");
     const data = await response.json();
 
+    // Land & EU-Status global speichern
+    window.userCountry = data.country_code || data.country || "UNKNOWN";
+    window.isEU = data.in_eu || false; // ipapi liefert direkt ein boolean "in_eu"
+
     const euCountries = [
       "AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR",
       "HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK",
       "SI","ES","SE"
     ];
 
-    if (euCountries.includes(data.country)) {
-      // EU-Bürger: Banner injizieren und anzeigen
+    // Zusätzlicher Sicherheits-Check für EU
+    if (window.isEU || euCountries.includes(window.userCountry)) {
+      window.isEU = true;
       injectConsentDialog();
       const dialog = document.getElementById('consent-dialog');
       if (dialog) dialog.style.display = 'block';
