@@ -16,9 +16,6 @@ function sendLogEvent(eventObj) {
     window.hasConsent ? "TRUE" : "FALSE"
   ].join(";");
 
-  // 2. Ab hier geht dein bisheriger Code weiter (z.B. fetch zum Cloudflare Worker)...
-}
-
   // 2. An deine neue Custom Domain auf Cloudflare senden
   fetch("https://worker.uyimbaya.com", {
     method: "POST",
@@ -38,7 +35,11 @@ function sendLogEvent(eventObj) {
       destination: eventObj.destination,
       url: window.location.href,
       fbp: (typeof getCookie === 'function') ? getCookie('_fbp') : null,
-      fbc: (typeof getCookie === 'function') ? getCookie('_fbc') : null
+      fbc: (typeof getCookie === 'function') ? getCookie('_fbc') : null,
+      // Zusätzliche Felder für Worker-Payload
+      country: window.userCountry || "UNKNOWN",
+      is_eu: window.isEU ? "YES" : "NO",
+      consent: window.hasConsent ? "TRUE" : "FALSE"
     })
   }).catch(err => console.error("Worker Log Error:", err));
 }
