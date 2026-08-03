@@ -39,6 +39,12 @@ function sendLogEvent(eventObj) {
 /* Init */
 document.getElementById("song-title").innerText = SONG_TITLE;
 
+// Liest die Beschreibung aus und schreibt sie in den Absatz, falls vorhanden
+const descEl = document.getElementById("album-description");
+if (descEl && typeof ALBUM_DESCRIPTION !== "undefined" && ALBUM_DESCRIPTION) {
+  descEl.textContent = ALBUM_DESCRIPTION;
+}
+
 const coverImg = document.getElementById("cover-img");
 coverImg.src = COVER_IMG;
 coverImg.style.width = COVER_SIZE + "px";
