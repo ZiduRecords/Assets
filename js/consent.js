@@ -29,7 +29,14 @@ function injectConsentDialog() {
     </div>
   `;
 
-  document.body.insertAdjacentHTML("beforeend", dialogHTML);
+  // Stellt sicher, dass document.body bereits bereitsteht
+  if (document.body) {
+    document.body.insertAdjacentHTML("beforeend", dialogHTML);
+  } else {
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.insertAdjacentHTML("beforeend", dialogHTML);
+    });
+  }
 }
 
 /* 1. Nutzer akzeptiert Tracking */
@@ -41,10 +48,14 @@ function acceptConsent() {
 
   enableButtons();
 
-  // Pixel laden, wenn PIXEL_MODE aktiv ist
+  // Pixel laden, wenn PIXEL_MODE aktiv ist und Ladefunktionen existieren
   if (typeof PIXEL_MODE !== 'undefined' && PIXEL_MODE) {
-    if (typeof META_PIXEL_ID !== 'undefined' && META_PIXEL_ID) loadMetaPixel(META_PIXEL_ID);
-    if (typeof TIKTOK_PIXEL_ID !== 'undefined' && TIKTOK_PIXEL_ID) loadTikTokPixel(TIKTOK_PIXEL_ID);
+    if (typeof META_PIXEL_ID !== 'undefined' && META_PIXEL_ID && typeof loadMetaPixel === 'function') {
+      loadMetaPixel(META_PIXEL_ID);
+    }
+    if (typeof TIKTOK_PIXEL_ID !== 'undefined' && TIKTOK_PIXEL_ID && typeof loadTikTokPixel === 'function') {
+      loadTikTokPixel(TIKTOK_PIXEL_ID);
+    }
   }
 }
 
@@ -79,21 +90,23 @@ async function checkEU() {
     ];
 
     if (euCountries.includes(data.country)) {
-      // EU-Bürger: Banner anzeigen
-      injectConsentDialog(); // <--- HTML erst jetzt in die Seite bauen!
-      document.getElementById('consent-dialog').style.display = 'block';
+      // EU-Bürger: Banner injizieren und anzeigen
+      injectConsentDialog();
+      const dialog = document.getElementById('consent-dialog');
+      if (dialog) dialog.style.display = 'block';
     } else {
       // Nicht-EU-Bürger: Automatisch Consent annehmen & Pixel laden
       acceptConsent();
     }
   } catch (e) {
     // Fallback bei Fehler/AdBlocker: Banner zur Sicherheit anzeigen
-    injectConsentDialog(); // <--- HTML erst jetzt in die Seite bauen!
-    document.getElementById('consent-dialog').style.display = 'block';
+    injectConsentDialog();
+    const dialog = document.getElementById('consent-dialog');
+    if (dialog) dialog.style.display = 'block';
   }
 }
 
-// Automatisch beim Laden der Seite ausführen
+/* Automatisch beim Laden der Seite ausführen */
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", checkEU);
 } else {
