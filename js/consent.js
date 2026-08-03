@@ -10,6 +10,28 @@ function enableButtons() {
   });
 }
 
+/* Erstellt den Consent-Dialog im HTML-DOM, falls er noch nicht existiert */
+function injectConsentDialog() {
+  if (document.getElementById("consent-dialog")) return;
+
+  const dialogHTML = `
+    <div id="consent-dialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 99999; backdrop-filter: blur(5px);">
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e1e1e; color: #ffffff; padding: 25px 30px; border-radius: 12px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-family: sans-serif;">
+        <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 18px; font-weight: 600;">Privacy Settings</h3>
+        <p style="font-size: 13px; line-height: 1.5; color: #ccc; margin-bottom: 20px;">
+          We use cookies and tracking technologies (Meta, TikTok) to analyze the use of our links.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button onclick="acceptConsent()" style="flex: 1; padding: 10px 16px; background-color: #1db954; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px;">Accept</button>
+          <button onclick="declineConsent()" style="flex: 1; padding: 10px 16px; background-color: #444; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px;">Decline</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", dialogHTML);
+}
+
 /* 1. Nutzer akzeptiert Tracking */
 function acceptConsent() {
   window.hasConsent = true;
@@ -58,15 +80,15 @@ async function checkEU() {
 
     if (euCountries.includes(data.country)) {
       // EU-Bürger: Banner anzeigen
-      const dialog = document.getElementById('consent-dialog');
-      if (dialog) dialog.style.display = 'block';
+      injectConsentDialog(); // <--- HTML erst jetzt in die Seite bauen!
+      document.getElementById('consent-dialog').style.display = 'block';
     } else {
       // Nicht-EU-Bürger: Automatisch Consent annehmen & Pixel laden
       acceptConsent();
     }
   } catch (e) {
     // Fallback bei Fehler/AdBlocker: Banner zur Sicherheit anzeigen
-    const dialog = document.getElementById('consent-dialog');
-    if (dialog) dialog.style.display = 'block';
+    injectConsentDialog(); // <--- HTML erst jetzt in die Seite bauen!
+    document.getElementById('consent-dialog').style.display = 'block';
   }
 }
