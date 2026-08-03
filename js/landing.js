@@ -1,6 +1,6 @@
 /* Logging-Hook an deinen neuen Worker (CAPI + GitHub Logs) */
 function sendLogEvent(eventObj) {
-  // 1. Exakt deine ursprüngliche CSV-Zeile für dein GitHub-Log erstellen
+  // 1. Exakt deine CSV-Zeile für dein GitHub-Log erstellen (erweitert um Country, Is_EU, Consent)
   const line = [
     eventObj.timestamp,
     eventObj.song,
@@ -9,8 +9,15 @@ function sendLogEvent(eventObj) {
     eventObj.source,
     eventObj.medium,
     eventObj.campaign,
-    eventObj.destination
+    eventObj.destination,
+    // --- NEUE FELDER ---
+    window.userCountry || "UNKNOWN",
+    window.isEU ? "YES" : "NO",
+    window.hasConsent ? "TRUE" : "FALSE"
   ].join(";");
+
+  // 2. Ab hier geht dein bisheriger Code weiter (z.B. fetch zum Cloudflare Worker)...
+}
 
   // 2. An deine neue Custom Domain auf Cloudflare senden
   fetch("https://worker.uyimbaya.com", {
