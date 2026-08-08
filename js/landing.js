@@ -1,6 +1,10 @@
-/* Logging-Hook an deinen neuen Worker (CAPI + GitHub Logs) */
 function sendLogEvent(eventObj) {
-  // 1. Exakt deine CSV-Zeile für dein GitHub-Log erstellen (erweitert um Country, Is_EU, Consent)
+  // Datum (YYYY-MM-DD) und Stunde (0-23) aus dem ISO-Timestamp extrahieren
+  const eventDate = new Date(eventObj.timestamp);
+  const dateOnly = eventObj.timestamp.split("T")[0];        // z.B. "2026-08-06"
+  const hourOnly = eventDate.getUTCHours();                 // z.B. 1 (für 01 Uhr UTC)
+
+  // 1. CSV-Zeile für dein GitHub-Log erstellen (jetzt mit 2 neuen Feldern am Ende)
   const line = [
     eventObj.timestamp,
     eventObj.song,
@@ -10,19 +14,21 @@ function sendLogEvent(eventObj) {
     eventObj.medium,
     eventObj.campaign,
     eventObj.destination,
-    // --- NEUE FELDER ---
     window.userCountry || "UNKNOWN",
     window.isEU ? "YES" : "NO",
-    window.hasConsent ? "TRUE" : "FALSE"
+    window.hasConsent ? "TRUE" : "FALSE",
+    // --- NEUE FELDER AM ENDE ---
+    dateOnly,
+    hourOnly
   ].join(";");
 
-  // 2. An deine neue Custom Domain auf Cloudflare senden
+  // 2. An Cloudflare Worker senden
   fetch("https://worker.uyimbaya.com", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      line: line, // Für GitHub Logging
-      event_id: eventObj.event_id, // Für Meta CAPI Deduplizierung
+      line: line,
+      event_id: eventObj.event_id,
       pixel_id: (typeof META_PIXEL_ID !== 'undefined') ? META_PIXEL_ID : ((typeof PIXEL_ID !== 'undefined') ? PIXEL_ID : null),
       pixel_mode: (typeof PIXEL_MODE !== 'undefined' && PIXEL_MODE) ? window.hasConsent : false,
       timestamp: eventObj.timestamp,
@@ -36,14 +42,15 @@ function sendLogEvent(eventObj) {
       url: window.location.href,
       fbp: (typeof getCookie === 'function') ? getCookie('_fbp') : null,
       fbc: (typeof getCookie === 'function') ? getCookie('_fbc') : null,
-      // Zusätzliche Felder für Worker-Payload
       country: window.userCountry || "UNKNOWN",
       is_eu: window.isEU ? "YES" : "NO",
-      consent: window.hasConsent ? "TRUE" : "FALSE"
+      consent: window.hasConsent ? "TRUE" : "FALSE",
+      // Zusätzliche Felder auch im Worker-Payload
+      date: dateOnly,
+      hour: hourOnly
     })
   }).catch(err => console.error("Worker Log Error:", err));
 }
-
 /* Init */
 document.getElementById("song-title").innerText = SONG_TITLE;
 
