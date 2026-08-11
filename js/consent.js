@@ -74,48 +74,66 @@ function declineConsent() {
 window.userCountry = "UNKNOWN";
 window.isEU = false;
 
-/* 3. EU-Geolokalisierungs-Check */
+/* 3. EU-Geolokalisierungs-Check mit Fallback-Anbieter */
 async function checkEU() {
-  // Wenn Pixel-Mode generell aus ist: Direkt freischalten
   if (typeof PIXEL_MODE !== 'undefined' && !PIXEL_MODE) {
     window.hasConsent = false;
     enableButtons();
     return;
   }
 
+  const euCountries = [
+    "AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR",
+    "HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK",
+    "SI","ES","SE"
+  ];
+
+  // Kleine Helper-Funktion mit Timeout, damit ein hängender Request
+  // die Seite nicht lange blockiert (max. 3 Sekunden pro Anbieter)
+  async function fetchWithTimeout(url, ms = 3000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), ms);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      return await res.json();
+    } finally {
+      clearTimeout(id);
+    }
+  }
+
+  let data = null;
+
+  // 1. Versuch: ipwho.is
   try {
-    // Wechsel auf ipwho.is (funktioniert ohne CORS- und Rate-Limit-Probleme auf GitHub Pages)
-    const response = await fetch("https://ipwho.is/");
-    const data = await response.json();
+    const d = await fetchWithTimeout("https://ipwho.is/");
+    if (d && d.success) data = { country: d.country_code, isEU: d.is_eu };
+  } catch (e) { /* weiter zum Fallback */ }
 
-    if (data && data.success) {
-      window.userCountry = data.country_code || "UNKNOWN";
-      window.isEU = data.is_eu || false;
-    } else {
-      window.isEU = true;
-    }
+  // 2. Versuch: Fallback-Anbieter, falls ipwho.is fehlschlägt
+  if (!data) {
+    try {
+      const d = await fetchWithTimeout("https://ipapi.co/json/");
+      if (d && d.country_code) {
+        data = { country: d.country_code, isEU: euCountries.includes(d.country_code) };
+      }
+    } catch (e) { /* beide fehlgeschlagen */ }
+  }
 
-    const euCountries = [
-      "AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR",
-      "HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK",
-      "SI","ES","SE"
-    ];
-
-    if (window.isEU || euCountries.includes(window.userCountry)) {
-      window.isEU = true;
-      injectConsentDialog();
-      const dialog = document.getElementById('consent-dialog');
-      if (dialog) dialog.style.display = 'block';
-    } else {
-      // Nicht-EU-Bürger: Automatisch Consent annehmen & Pixel laden
-      acceptConsent();
-    }
-  } catch (e) {
-    // Fallback bei AdBlocker / Netzwerkfehler: Banner zur Sicherheit anzeigen
+  if (data) {
+    window.userCountry = data.country || "UNKNOWN";
+    window.isEU = !!data.isEU || euCountries.includes(window.userCountry);
+  } else {
+    // Beide Anbieter fehlgeschlagen: sicherheitshalber EU annehmen
+    window.userCountry = "UNKNOWN";
     window.isEU = true;
+  }
+
+  if (window.isEU) {
     injectConsentDialog();
     const dialog = document.getElementById('consent-dialog');
     if (dialog) dialog.style.display = 'block';
+  } else {
+    acceptConsent();
   }
 }
 
