@@ -1,10 +1,24 @@
+// --- OS-Erkennung direkt im Browser ---
+function detectOS() {
+  const ua = navigator.userAgent;
+  if (/iphone|ipad|ipod/i.test(ua)) return "iOS";
+  if (/mac os|macintosh/i.test(ua)) return "macOS";
+  if (/android/i.test(ua)) return "Android";
+  if (/windows/i.test(ua)) return "Windows";
+  if (/linux/i.test(ua)) return "Linux";
+  return "Unknown";
+}
+
+const currentOS = detectOS();
+const isAppleDevice = (currentOS === "iOS" || currentOS === "macOS");
+
 function sendLogEvent(eventObj) {
   // Datum (YYYY-MM-DD) und Stunde (0-23) aus dem ISO-Timestamp extrahieren
   const eventDate = new Date(eventObj.timestamp);
-  const dateOnly = eventObj.timestamp.split("T")[0];        // z.B. "2026-08-06"
-  const hourOnly = eventDate.getUTCHours();                 // z.B. 1 (für 01 Uhr UTC)
+  const dateOnly = eventObj.timestamp.split("T")[0];         // z.B. "2026-08-06"
+  const hourOnly = eventDate.getUTCHours();                   // z.B. 1 (für 01 Uhr UTC)
 
-  // 1. CSV-Zeile für dein GitHub-Log erstellen (jetzt mit 2 neuen Feldern am Ende)
+  // 1. CSV-Zeile für dein GitHub-Log erstellen (inkl. OS am Ende)
   const line = [
     eventObj.timestamp,
     eventObj.song,
@@ -17,9 +31,9 @@ function sendLogEvent(eventObj) {
     window.userCountry || "UNKNOWN",
     window.isEU ? "YES" : "NO",
     window.hasConsent ? "TRUE" : "FALSE",
-    // --- NEUE FELDER AM ENDE ---
     dateOnly,
-    hourOnly
+    hourOnly,
+    currentOS // <--- Das erkannte OS wird hier direkt für die CSV mitgeliefert
   ].join(";");
 
   // 2. An Cloudflare Worker senden
@@ -45,16 +59,16 @@ function sendLogEvent(eventObj) {
       country: window.userCountry || "UNKNOWN",
       is_eu: window.isEU ? "YES" : "NO",
       consent: window.hasConsent ? "TRUE" : "FALSE",
-      // Zusätzliche Felder auch im Worker-Payload
       date: dateOnly,
-      hour: hourOnly
+      hour: hourOnly,
+      os: currentOS
     })
   }).catch(err => console.error("Worker Log Error:", err));
 }
+
 /* Init */
 document.getElementById("song-title").innerText = SONG_TITLE;
 
-// Liest die Beschreibung aus und schreibt sie in den Absatz, falls vorhanden
 const descEl = document.getElementById("album-description");
 if (descEl && typeof ALBUM_DESCRIPTION !== "undefined" && ALBUM_DESCRIPTION) {
   descEl.textContent = ALBUM_DESCRIPTION;
@@ -68,13 +82,14 @@ extractColors(COVER_IMG);
 
 const container = document.getElementById("platforms");
 
-/* Plattformen */
+/* Plattformen – Hier steuern wir Apple dynamisch über isAppleDevice! */
 const platforms = [
-  { logo: "https://zidurecords.github.io/Assets/img/PRESAVELOGO.png",   text: "Presave",     link: PRESAVE_LINK,    show: SHOW_PRESAVE },
-  { logo: "https://zidurecords.github.io/Assets/img/SPOTIFYLOGO.png",   text: "Spotify",     link: SPOTIFY_LINK,    show: SHOW_SPOTIFY },
-  { logo: "https://zidurecords.github.io/Assets/img/APPLELOGO.png",     text: "Apple Music", link: APPLE_LINK,      show: SHOW_APPLE },
-  { logo: "https://zidurecords.github.io/Assets/img/INSTAGRAMLOGO.png", text: "Instagram",   link: INSTAGRAM_LINK,  show: SHOW_INSTAGRAM },
-  { logo: "https://zidurecords.github.io/Assets/img/TIKTOKLOGO.png",    text: "TikTok",      link: TIKTOK_LINK,     show: SHOW_TIKTOK }
+  { logo: "https://zidurecords.github.io/Assets/img/PRESAVELOGO.png",    text: "Presave",     link: PRESAVE_LINK,     show: SHOW_PRESAVE },
+  { logo: "https://zidurecords.github.io/Assets/img/SPOTIFYLOGO.png",    text: "Spotify",     link: SPOTIFY_LINK,     show: SHOW_SPOTIFY },
+  // Apple Music wird nur angezeigt, wenn SHOW_APPLE true ist UND der Nutzer ein Apple-Gerät hat!
+  { logo: "https://zidurecords.github.io/Assets/img/APPLELOGO.png",      text: "Apple Music", link: APPLE_LINK,       show: SHOW_APPLE && isAppleDevice },
+  { logo: "https://zidurecords.github.io/Assets/img/INSTAGRAMLOGO.png", text: "Instagram",    link: INSTAGRAM_LINK,   show: SHOW_INSTAGRAM },
+  { logo: "https://zidurecords.github.io/Assets/img/TIKTOKLOGO.png",     text: "TikTok",      link: TIKTOK_LINK,      show: SHOW_TIKTOK }
 ];
 
 /* Rendern */
@@ -107,17 +122,13 @@ platforms.forEach(p => {
     const campaign = urlParams.get('utm_campaign') || "";
 
     const eventName = p.text.replace(/\s+/g, '') + 'Click';
-
-    // Eindeutige ID für die Deduplizierung zwischen Browser-Pixel und CAPI
     const eventId = "evt_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
 
-    // 1. Meta Browser-Pixel nur abfeuern, wenn Consent vorliegt
     if (window.hasConsent && typeof fbq === 'function') {
       fbq('track', 'OutboundClick', {}, { eventID: eventId });
       fbq('track', eventName, {}, { eventID: eventId });
     }
     
-    // 2. TikTok Pixel nur abfeuern, wenn Consent vorliegt
     if (window.hasConsent && typeof ttq === 'object') {
       ttq.track('ClickButton', {
         button_name: p.text,
@@ -125,7 +136,6 @@ platforms.forEach(p => {
       });
     }
 
-    // 3. Event an Worker senden (CAPI + GitHub Logs)
     sendLogEvent({
       event_id: eventId,
       timestamp: new Date().toISOString(),
@@ -138,15 +148,14 @@ platforms.forEach(p => {
       destination: p.link
     });
 
-    // Weiterleitung mit gewohnter Verzögerung
     setTimeout(() => {
       window.location.href = p.link;
     }, 180);
   };
 
-  row.appendChild(logo);
-  row.appendChild(btn);
-  container.appendChild(row);
+     row.appendChild(logo);
+     row.appendChild(btn);
+     container.appendChild(row);
 });
 
 checkEU();
