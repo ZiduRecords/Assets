@@ -148,8 +148,27 @@ platforms.forEach(p => {
       destination: p.link
     });
 
+    // --- SPOTIFY DEEP LINKING & FALLBACK ---
+    let targetLink = p.link;
+
+    if (p.text === "Spotify" && (currentOS === "iOS" || currentOS === "Android")) {
+      // Wandle https://open.spotify.com/... in spotify://... um
+      const spotifyUri = p.link.replace("https://open.spotify.com/", "spotify://").replace(/[\?#].*$/, "");
+      
+      // Versuch, die App zu öffnen
+      window.location.href = spotifyUri;
+
+      // Fallback auf Webversion nach 1.2 Sekunden, falls die App nicht öffnet
+      setTimeout(() => {
+        window.location.href = p.link;
+      }, 1200);
+
+      return;
+    }
+    // ---------------------------------------
+
     setTimeout(() => {
-      window.location.href = p.link;
+      window.location.href = targetLink;
     }, 180);
   };
 
