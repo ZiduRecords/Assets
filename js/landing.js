@@ -148,11 +148,11 @@ platforms.forEach(p => {
       destination: p.link
     });
 
-    // --- SPOTIFY DEEP LINKING & FALLBACK ---
+    // --- SPOTIFY DEEP LINKING & FALLBACK (Universell für Android & iOS) ---
     let targetLink = p.link;
 
     if (p.text === "Spotify" && (currentOS === "iOS" || currentOS === "Android")) {
-      // Entfernt alle Sprach-/Regional-Präfixe wie /intl-de/, /de/, /de-de/ etc. direkt nach open.spotify.com/
+      // Bereinigt alle Sprach-/Regionalpfade wie /intl-de/, /de/, /de-de/ etc.
       let cleanUrl = p.link.replace(
         /(https:\/\/open\.spotify\.com\/)(?:intl-[a-z]{2}|[a-z]{2}(?:-[a-z]{2})?)\//, 
         "$1"
@@ -170,7 +170,7 @@ platforms.forEach(p => {
 
       return;
     }
-    // ---------------------------------------
+    // --------------------------------------------------------------------
 
     setTimeout(() => {
       window.location.href = targetLink;
