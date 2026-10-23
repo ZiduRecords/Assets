@@ -152,8 +152,9 @@ platforms.forEach(p => {
     let targetLink = p.link;
 
     if (p.text === "Spotify" && (currentOS === "iOS" || currentOS === "Android")) {
-      // Wandle https://open.spotify.com/... in spotify://... um
-      const spotifyUri = p.link.replace("https://open.spotify.com/", "spotify://").replace(/[\?#].*$/, "");
+      // 1. Sprach-Präfixe wie /intl-de/ oder /intl-en/ entfernen und in spotify:// umwandeln
+      let cleanUrl = p.link.replace(/\/intl-[a-z]{2}\//, "/");
+      const spotifyUri = cleanUrl.replace("https://open.spotify.com/", "spotify://").replace(/[\?#].*$/, "");
       
       // Versuch, die App zu öffnen
       window.location.href = spotifyUri;
