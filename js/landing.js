@@ -152,8 +152,12 @@ platforms.forEach(p => {
     let targetLink = p.link;
 
     if (p.text === "Spotify" && (currentOS === "iOS" || currentOS === "Android")) {
-      // 1. Sprach-Präfixe wie /intl-de/ oder /intl-en/ entfernen und in spotify:// umwandeln
-      let cleanUrl = p.link.replace(/\/intl-[a-z]{2}\//, "/");
+      // Entfernt alle Sprach-/Regional-Präfixe wie /intl-de/, /de/, /de-de/ etc. direkt nach open.spotify.com/
+      let cleanUrl = p.link.replace(
+        /(https:\/\/open\.spotify\.com\/)(?:intl-[a-z]{2}|[a-z]{2}(?:-[a-z]{2})?)\//, 
+        "$1"
+      );
+      
       const spotifyUri = cleanUrl.replace("https://open.spotify.com/", "spotify://").replace(/[\?#].*$/, "");
       
       // Versuch, die App zu öffnen
