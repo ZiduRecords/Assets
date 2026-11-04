@@ -129,8 +129,16 @@ platforms.forEach(p => {
       fbq('track', eventName, {}, { eventID: eventId });
     }
     
+    // TikTok Pixel mit dynamischem Event-Namen (z.B. SpotifyClick) abfeuern
     if (window.hasConsent && typeof ttq === 'object') {
-      ttq.track('ClickButton', {
+      ttq.track(eventName, {
+        contents: [
+          {
+            content_id: p.text.toLowerCase(),
+            content_type: "product",
+            content_name: SONG_TITLE
+          }
+        ],
         button_name: p.text,
         destination: p.link
       });
