@@ -4,6 +4,7 @@
 
 /* META PIXEL LOAD */
 function loadMetaPixel(id) {
+  if (!id) return;
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
   n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -19,6 +20,7 @@ function loadMetaPixel(id) {
 
 /* TIKTOK PIXEL LOAD */
 function loadTikTokPixel(id) {
+  if (!id) return;
   !function (w, d, t) {
     w.TiktokAnalyticsObject = t;
     var ttq = w[t] = w[t] || [];
