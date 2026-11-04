@@ -117,8 +117,16 @@ platforms.forEach(p => {
     event.preventDefault();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const source = urlParams.get('utm_source') || "organic";
-    const medium = urlParams.get('utm_medium') || "";
+    
+    // UTM-Parameter auslesen oder bei TikTok Ads über ttclid automatisch erkennen
+    let source = urlParams.get('utm_source');
+    const ttclid = urlParams.get('ttclid');
+    if (!source && ttclid) {
+      source = "tiktok";
+    }
+
+    const utmSource = source || "organic";
+    const medium = urlParams.get('utm_medium') || (ttclid ? "paid" : "");
     const campaign = urlParams.get('utm_campaign') || "";
 
     const eventName = p.text.replace(/\s+/g, '') + 'Click';
@@ -150,9 +158,9 @@ platforms.forEach(p => {
       song: SONG_TITLE,
       platform: p.text,
       event: eventName,
-      source,
-      medium,
-      campaign,
+      source: utmSource,
+      medium: medium,
+      campaign: campaign,
       destination: p.link
     });
 
