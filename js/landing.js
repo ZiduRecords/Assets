@@ -16,7 +16,7 @@ function sendLogEvent(eventObj) {
   // Datum (YYYY-MM-DD) und Stunde (0-23) aus dem ISO-Timestamp extrahieren
   const eventDate = new Date(eventObj.timestamp);
   const dateOnly = eventObj.timestamp.split("T")[0];         // z.B. "2026-08-06"
-  const hourOnly = eventDate.getUTCHours();                   // z.B. 1 (für 01 Uhr UTC)
+  const hourOnly = eventDate.getUTCHours();                    // z.B. 1 (für 01 Uhr UTC)
 
   // 1. CSV-Zeile für dein GitHub-Log erstellen (inkl. OS am Ende)
   const line = [
@@ -43,6 +43,7 @@ function sendLogEvent(eventObj) {
     body: JSON.stringify({
       line: line,
       event_id: eventObj.event_id,
+      test_event_code: eventObj.test_event_code, // <--- Test-Code für TikTok CAPI übergeben
       pixel_id: (typeof META_PIXEL_ID !== 'undefined') ? META_PIXEL_ID : ((typeof PIXEL_ID !== 'undefined') ? PIXEL_ID : null),
       pixel_mode: (typeof PIXEL_MODE !== 'undefined' && PIXEL_MODE) ? window.hasConsent : false,
       timestamp: eventObj.timestamp,
@@ -84,12 +85,12 @@ const container = document.getElementById("platforms");
 
 /* Plattformen – Hier steuern wir Apple dynamisch über isAppleDevice! */
 const platforms = [
-  { logo: "https://zidurecords.github.io/Assets/img/PRESAVELOGO.png",    text: "Presave",     link: PRESAVE_LINK,     show: SHOW_PRESAVE },
-  { logo: "https://zidurecords.github.io/Assets/img/SPOTIFYLOGO.png",    text: "Spotify",     link: SPOTIFY_LINK,     show: SHOW_SPOTIFY },
+  { logo: "https://zidurecords.github.io/Assets/img/PRESAVELOGO.png",    text: "Presave",    link: PRESAVE_LINK,    show: SHOW_PRESAVE },
+  { logo: "https://zidurecords.github.io/Assets/img/SPOTIFYLOGO.png",    text: "Spotify",    link: SPOTIFY_LINK,    show: SHOW_SPOTIFY },
   // Apple Music wird nur angezeigt, wenn SHOW_APPLE true ist UND der Nutzer ein Apple-Gerät hat!
-  { logo: "https://zidurecords.github.io/Assets/img/APPLELOGO.png",      text: "Apple Music", link: APPLE_LINK,       show: SHOW_APPLE && isAppleDevice },
-  { logo: "https://zidurecords.github.io/Assets/img/INSTAGRAMLOGO.png", text: "Instagram",    link: INSTAGRAM_LINK,   show: SHOW_INSTAGRAM },
-  { logo: "https://zidurecords.github.io/Assets/img/TIKTOKLOGO.png",     text: "TikTok",      link: TIKTOK_LINK,      show: SHOW_TIKTOK }
+  { logo: "https://zidurecords.github.io/Assets/img/APPLELOGO.png",     text: "Apple Music", link: APPLE_LINK,        show: SHOW_APPLE && isAppleDevice },
+  { logo: "https://zidurecords.github.io/Assets/img/INSTAGRAMLOGO.png", text: "Instagram",    link: INSTAGRAM_LINK,    show: SHOW_INSTAGRAM },
+  { logo: "https://zidurecords.github.io/Assets/img/TIKTOKLOGO.png",     text: "TikTok",     link: TIKTOK_LINK,     show: SHOW_TIKTOK }
 ];
 
 /* Rendern */
@@ -128,6 +129,7 @@ platforms.forEach(p => {
     const utmSource = source || "organic";
     const medium = urlParams.get('utm_medium') || (ttclid ? "paid" : "");
     const campaign = urlParams.get('utm_campaign') || "";
+    const testEventCode = urlParams.get('test_event_code') || null;
 
     const eventName = p.text.replace(/\s+/g, '') + 'Click';
     const eventId = "evt_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
@@ -137,7 +139,7 @@ platforms.forEach(p => {
       fbq('track', eventName, {}, { eventID: eventId });
     }
     
-    // TikTok Pixel mit dynamischem Event-Namen (z.B. SpotifyClick) abfeuern
+    // TikTok Pixel mit Event-ID für saubere Deduplizierung abfeuern
     if (window.hasConsent && typeof ttq === 'object') {
       ttq.track(eventName, {
         contents: [
@@ -149,11 +151,14 @@ platforms.forEach(p => {
         ],
         button_name: p.text,
         destination: p.link
+      }, {
+        event_id: eventId // <--- Bindet Browser- und Server-Event nahtlos zusammen
       });
     }
 
     sendLogEvent({
       event_id: eventId,
+      test_event_code: testEventCode, // <--- An Log/Worker übergeben
       timestamp: new Date().toISOString(),
       song: SONG_TITLE,
       platform: p.text,
