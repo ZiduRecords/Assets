@@ -1,7 +1,7 @@
 /* Zentrale Konfiguration */
 
 const META_PIXEL_ID = "1288632976680117";
-// const TIKTOK_PIXEL_ID = "DBLLL1JC77U4J2JQUDS0"; // TikTok Pixel wird nur beim Verzeichnis der Landingpage für TikTok Ads verwendet
+// const TIKTOK_PIXEL_ID = "DBLLL1JC77U4J2JQUDS0"; // TikTok Pixel wird nur beim Verzeichnis der Landingpage für TikTok Ads verwendet Siehe XMas Album
 
 /* Pixel aktivieren/deaktivieren */
 const PIXEL_MODE = true;
